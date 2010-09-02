@@ -25,10 +25,11 @@
 
 -export([all/1,init_per_testcase/2,fin_per_testcase/2,
 	 basic/1,api_open_close/1,api_listen/1,api_connect_init/1,
-	 xfer_min/1,xfer_active/1]).
+	 xfer_min/1,xfer_active/1,implicit_inet6/1]).
 
 all(suite) ->
-    [basic,api_open_close,api_listen,api_connect_init,xfer_min,xfer_active].
+    [basic,api_open_close,api_listen,api_connect_init,
+     xfer_min,xfer_active,implicit_inet6].
 
 init_per_testcase(_Func, Config) ->
     Dog = test_server:timetrap(test_server:seconds(15)),
@@ -382,3 +383,57 @@ api_connect_init(Config) when is_list(Config) ->
     ?line ok = gen_sctp:close(Sa),
     ?line ok = gen_sctp:close(Sb),
     ok.
+
+
+
+implicit_inet6(Config) when is_list(Config) ->
+    ?line Hostname = ok(inet:gethostname()),
+    ?line
+	case gen_sctp:open(0, [inet6]) of
+	    {ok,S1} ->
+		?line
+		    case inet:getaddr(Hostname, inet6) of
+			{ok,Host} ->
+			    ?line Loopback = {0,0,0,0,0,0,0,1},
+			    ?line io:format("~s ~p~n", ["Loopback",Loopback]),
+			    ?line implicit_inet6(S1, Loopback),
+			    ?line ok = gen_sctp:close(S1),
+			    %%
+			    ?line Localhost =
+				ok(inet:getaddr("localhost", inet6)),
+			    ?line io:format("~s ~p~n", ["localhost",Localhost]),
+			    ?line S2 =
+				ok(gen_sctp:open(0, [{ip,Localhost}])),
+			    ?line implicit_inet6(S2, Localhost),
+			    ?line ok = gen_sctp:close(S2),
+			    %%
+			    ?line io:format("~s ~p~n", [Hostname,Host]),
+			    ?line S3 =
+				ok(gen_sctp:open(0, [{ifaddr,Host}])),
+			    ?line implicit_inet6(S3, Host),
+			    ?line ok = gen_sctp:close(S1);
+			{error,eafnosupport} ->
+			    ?line ok = gen_sctp:close(S1),
+			    {skip,"Can not look up IPv6 address"}
+		    end;
+	    _ ->
+		{skip,"IPv6 not supported"}
+	end.
+
+implicit_inet6(S1, Addr) ->
+    ?line ok = gen_sctp:listen(S1, true),
+    ?line P1 = ok(inet:port(S1)),
+    ?line S2 = ok(gen_sctp:open(0, [inet6])),
+    ?line P2 = ok(inet:port(S2)),
+    ?line #sctp_assoc_change{state=comm_up} =
+	ok(gen_sctp:connect(S2, Addr, P1, [])),
+    ?line case ok(gen_sctp:recv(S1)) of
+	      {Addr,P2,[],#sctp_assoc_change{state=comm_up}} ->
+		  ok
+	  end,
+    ?line {Addr,P1} = ok(inet:sockname(S1)),
+    ?line {Addr,P2} = ok(inet:sockname(S2)),
+    ?line ok = gen_sctp:close(S2).
+
+
+ok({ok,V}) -> V.
