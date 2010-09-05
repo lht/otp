@@ -497,7 +497,6 @@ CFLAG_RUNTIME_LIBRARY_PATH="-Wl,-R"
 case $host_os in
   darwin*)
 	CFLAG_RUNTIME_LIBRARY_PATH=
-	CFLAGS="$CFLAGS -no-cpp-precomp"
 	;;
   win32)
 	CFLAG_RUNTIME_LIBRARY_PATH=

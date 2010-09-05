@@ -144,7 +144,11 @@ extern erts_smp_spinlock_t erts_bp_lock;
 #define ErtsSmpBPUnlock(BDC)
 #endif
 
-ERTS_INLINE Uint bp_sched2ix(void);
+#ifdef ERTS_SMP
+#define bp_sched2ix() (erts_get_scheduler_data()->no - 1)
+#else
+#define bp_sched2ix() (0)
+#endif
 
 #ifdef ERTS_SMP
 #define bp_sched2ix_proc(p) ((p)->scheduler_data->no - 1)

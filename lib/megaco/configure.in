@@ -206,12 +206,6 @@ dnl
 if test "X$host" = "Xwin32"; then
   DED_CFLAGS="$CFLAGS"
 else
-  case $host_os in
-    darwin*)
-	CFLAGS="$CFLAGS -no-cpp-precomp -fno-common"
-	;;
-  esac
-
   if test "x$GCC" = xyes; then
 	DED_CFLAGS="$CFLAGS -fPIC $DED_CFLAGS"
   else
