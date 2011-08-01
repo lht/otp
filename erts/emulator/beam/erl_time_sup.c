@@ -106,8 +106,15 @@ static void init_tolerant_timeofday(void)
     if (sysconf(_SC_NPROCESSORS_CONF) > 1) {
 	char b[1024];
 	int maj,min,build;
+#ifndef __native_client__
 	os_flavor(b,1024);
 	os_version(&maj,&min,&build);
+#else
+        b = "nacl";
+        maj = 0;
+        min = 5;
+        build = 0;
+#endif
 	if (!strcmp(b,"sunos") && maj <= 5 && min <= 7) {
 	    erts_disable_tolerant_timeofday = 1;
 	}

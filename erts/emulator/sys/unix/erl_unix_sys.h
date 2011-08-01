@@ -29,7 +29,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef QNX
+#if !defined (QNX) && !defined(__native_client__)
 #include <memory.h>
 #endif
 
@@ -102,10 +102,12 @@
 #define HZ 60
 #endif
 
+#ifndef __native_client__
 #ifdef NETDB_H_NEEDS_IN_H
 #include <netinet/in.h>
 #endif
 #include <netdb.h>
+#endif
 
 /*
  * Make sure that MAXPATHLEN is defined.

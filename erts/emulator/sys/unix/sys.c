@@ -30,16 +30,27 @@
 #include <time.h>
 #include <signal.h>
 #include <sys/wait.h>
+
+#ifndef __native_client__
 #include <sys/uio.h>
-#include <termios.h>
+#endif
+
 #include <ctype.h>
+
+#ifndef __native_client__
+#include <termios.h>
+#else
+#include "nacl.h"
+#endif
+
+#ifndef __native_client__
 #include <sys/utsname.h>
+#endif
 
 #ifdef ISC32
 #include <sys/bsdtypes.h>
 #endif
 
-#include <termios.h>
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -329,6 +340,18 @@ init_check_io(void)
 #define ERTS_CHK_IO_INTR_TMD	(*io_func.check_io_interrupt_tmd)
 #define ERTS_CHK_IO		(*io_func.check_io)
 #define ERTS_CHK_IO_SZ		(*io_func.size)
+
+#elif defined(__native_client__)
+
+#define ERTS_CHK_IO_INTR(X)
+#define ERTS_CHK_IO_INTR_TMD(X)
+#define ERTS_CHK_IO(X)
+#define ERTS_CHK_IO_SZ		erts_check_io_size
+
+static void
+init_check_io(void)
+{
+}
 
 #else /* !ERTS_ENABLE_KERNEL_POLL */
 
@@ -928,6 +951,7 @@ get_number(char **str_ptr)
     }
 }
 
+#ifndef __native_client__
 void
 os_flavor(char* namebuf, 	/* Where to return the name. */
 	  unsigned size) 	/* Size of name buffer. */
@@ -966,6 +990,7 @@ int* pBuild;			/* Pointer to build number. */
     *pMinor = get_number(&release);
     *pBuild = get_number(&release);
 }
+#endif /* __native_client__ */
 
 void init_getenv_state(GETENV_STATE *state)
 {
@@ -2059,6 +2084,10 @@ static void outputv(ErlDrvData e, ErlIOVec* ev)
 
 static void output(ErlDrvData e, char* buf, int len)
 {
+#ifdef __native_client__
+  return;
+}
+#else
     int fd = (int)(long)e;
     int ix = driver_data[fd].port_num;
     int pb = driver_data[fd].packet_bytes;
@@ -2110,6 +2139,8 @@ static void output(ErlDrvData e, char* buf, int len)
     }
     return; /* 0; */
 }
+#endif
+
 
 static int port_inp_failure(int port_num, int ready_fd, int res)
 				/* Result: 0 (eof) or -1 (error) */

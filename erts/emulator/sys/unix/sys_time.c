@@ -34,10 +34,14 @@
 #include "sys.h"
 #include "global.h"
 
-#ifdef NO_SYSCONF
-#  define TICKS_PER_SEC()	HZ
+#ifdef __native_client__
+#  define TICKS_PER_SEC()	_CLOCKS_PER_SEC_
 #else
-#define TICKS_PER_SEC()	sysconf(_SC_CLK_TCK)
+#  ifdef NO_SYSCONF
+#    define TICKS_PER_SEC()	HZ
+#  else
+#    define TICKS_PER_SEC()	sysconf(_SC_CLK_TCK)
+#  endif
 #endif
 
 #ifdef HAVE_GETHRVTIME_PROCFS_IOCTL

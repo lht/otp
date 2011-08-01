@@ -2136,7 +2136,11 @@ BIF_RETTYPE system_info_1(BIF_ALIST_1)
        Eterm flav, tup;
        char *buf = erts_alloc(ERTS_ALC_T_TMP, 1024); /* More than enough */
 
+#ifndef __native_client__
        os_flavor(buf, 1024);
+#else
+       buf = "nacl";
+#endif
        flav = am_atom_put(buf, strlen(buf));
        hp = HAlloc(BIF_P, 3);
        tup = TUPLE2(hp, type, flav);

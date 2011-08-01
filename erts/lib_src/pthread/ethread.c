@@ -202,10 +202,12 @@ ethr_thr_create(ethr_tid *tid, void * (*func)(void *), void *arg,
 
     /* Error cleanup needed after this point */
 
+#ifndef __native_client__
     /* Schedule child thread in system scope (if possible) ... */
     res = pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
     if (res != 0 && res != ENOTSUP)
 	goto error;
+#endif
 
     if (use_stack_size >= 0) {
 	size_t suggested_stack_size = (size_t) use_stack_size;

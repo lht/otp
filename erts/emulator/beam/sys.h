@@ -651,8 +651,10 @@ void get_now(Uint*, Uint*, Uint*);
 void get_sys_now(Uint*, Uint*, Uint*);
 void set_break_quit(void (*)(void), void (*)(void));
 
+#ifndef __native_client__
 void os_flavor(char*, unsigned);
 void os_version(int*, int*, int*);
+#endif
 void init_getenv_state(GETENV_STATE *);
 char * getenv_string(GETENV_STATE *);
 void fini_getenv_state(GETENV_STATE *);

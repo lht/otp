@@ -177,8 +177,8 @@ AS_HELP_STRING([--enable-lock-checking], [enable lock checking]),
 AC_ARG_ENABLE(lock-counter,
 AS_HELP_STRING([--enable-lock-counter], [enable lock counters]),
 [ case "$enableval" in
-    no) enable_lock_count=no ;;
     *)  enable_lock_count=yes ;;
+    no) enable_lock_count=no ;;
   esac ], enable_lock_count=no)
 
 AC_ARG_ENABLE(kernel-poll,
@@ -378,6 +378,16 @@ dnl ----------------------------------------------------------------------
 
 AC_PROG_CC
 AC_SUBST(GCC)
+
+dnl ---------------------------------------------------------------------
+dnl Native Client
+dnl ---------------------------------------------------------------------
+#ifdef __native_client__
+#define HAVE_GETTIMEOFDAY 1
+#define HAVE_UNISTD_H 1
+#define MAIN_FUNCTION original_main
+#define NOASSEMBLY
+#endif
 
 dnl ---------------------------------------------------------------------
 dnl Special stuff regarding CFLAGS and details in the environment...

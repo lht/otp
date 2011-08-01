@@ -1561,7 +1561,9 @@ __decl_noreturn void erl_exit0(char *file, int line, int n, char *fmt,...)
     if (fmt != NULL && *fmt != '\0')
 	  erl_error(fmt, args);	/* Print error message. */
     va_end(args);
+#ifndef __native_client__
     sys_tty_reset(n);
+#endif
 
     if (n == ERTS_INTR_EXIT)
 	exit(0);
@@ -1601,7 +1603,9 @@ __decl_noreturn void erl_exit(int n, char *fmt,...)
     if (fmt != NULL && *fmt != '\0')
 	  erl_error(fmt, args);	/* Print error message. */
     va_end(args);
+#ifndef __native_client__
     sys_tty_reset(n);
+#endif
 
     if (n == ERTS_INTR_EXIT)
 	exit(0);
